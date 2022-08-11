@@ -50,6 +50,22 @@ export const walletEnabled = () => {
     } else {
       if (window.ethereum) {
         window.web3 = new Web3(window.ethereum)
+        if (!window.ethereum._metamask) {
+          if (window.ethereum.isNiftyWallet) {
+            window.ethereum.enable()
+            window.web3 = new Web3(window.web3.currentProvider)
+            resolve(true)
+          } else {
+            return window.ethereum.request({ method: 'eth_requestAccounts' })
+              .then((_res) => {
+                window.web3 = new Web3(window.web3.currentProvider)
+                resolve(true)
+              })
+              .catch(_error => {
+                resolve(false)
+              })
+          }
+        }
         window.ethereum._metamask.isUnlocked()
           .then(isUnlocked => {
             if (isUnlocked && window.ethereum.isNiftyWallet) { // Nifty Wallet
